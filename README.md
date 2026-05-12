@@ -80,19 +80,31 @@ for worker in worker1 worker2 worker3; do
 done
 ```
 
-### Paso 4: Carga de Datos y Estructura HDFS
-Aún dentro del nodo Master, ejecuta el script de carga. Este script:
-1. Descargará `data.zip` (1GB) desde Google Drive.
+### Paso 4: Carga de Datos y Estructura HDFS (¡IMPORTANTE!)
+**⚠️ ADVERTENCIA:** NO ejecutes el siguiente script en AWS CloudShell ni en tu computadora local. **Debe ejecutarse estrictamente dentro del nodo Master.**
+
+Asegúrate de estar dentro del nodo Master (el prompt debe decir `ubuntu@ip-...`). Si no lo estás, conéctate y clona el repositorio allí:
+
+```bash
+# 1. Conéctate al Master (reemplaza por tu IP pública)
+ssh -i hadoop-onpe-key.pem ubuntu@<IP_PÚBLICA_MASTER>
+
+# 2. Clona el repo DENTRO del Master
+git clone https://github.com/jflma/onpe-hadoop-cluster.git
+cd onpe-hadoop-cluster
+
+# 3. Ejecuta el script de carga
+bash upload_data.sh
+```
+
+Este script:
+1. Descargará `data.zip` (1GB) desde Google Drive directo al Master.
 2. Descomprimirá la carpeta `data/` que contiene todos los archivos JSON (23GB).
 3. Creará toda la estructura de carpetas en HDFS (`/onpe/raw`, `/onpe/clean`, etc.).
 4. Subirá todos los JSONs a `/onpe/raw/`.
 5. Borrará los archivos locales del Master para liberar espacio.
 
-Ejecuta:
-```bash
-bash upload_data.sh
-```
-*Nota: Este proceso tomará varios minutos debido a la cantidad de información.*
+*Nota: Este proceso tomará varios minutos debido a la inmensa cantidad de información.*
 
 ### Paso 5: Ejecución de Jobs MapReduce 
 Una vez desarrollados y compilados los archivos `.jar` en la carpeta `jobs/`, puedes ejecutarlos desde el Master usando los scripts en la carpeta `scripts/`.
