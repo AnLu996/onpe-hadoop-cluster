@@ -13,7 +13,7 @@ FILE_NAME="data.zip"
 pip3 install gdown
 
 echo "=== 2. Descargando archivo data.zip desde Google Drive ==="
-gdown "$DRIVE_ID" -O "$FILE_NAME"
+python3 -m gdown "$DRIVE_ID" -O "$FILE_NAME"
 
 if [ ! -f "$FILE_NAME" ]; then
     echo "Error: No se pudo descargar el archivo $FILE_NAME."
