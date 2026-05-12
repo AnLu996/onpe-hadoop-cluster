@@ -81,7 +81,9 @@ done
 ```
 
 ### Paso 4: Carga de Datos y Estructura HDFS (¡IMPORTANTE!)
-**⚠️ ADVERTENCIA:** NO ejecutes el siguiente script en AWS CloudShell ni en tu computadora local. **Debe ejecutarse estrictamente dentro del nodo Master.**
+**⚠️ ADVERTENCIA:** NO ejecutes estos scripts en AWS CloudShell ni en tu computadora local. **Deben ejecutarse estrictamente dentro del nodo Master.**
+
+**Nota sobre recursos:** Las instancias `t2.micro` tienen solo 1GB de RAM. Manejar 23GB de JSONs exige mucha memoria y el Master podría desconectarse por seguridad durante el proceso. Si tu laboratorio de AWS lo permite, cambia `INSTANCE_TYPE` a `t3.medium` (4GB RAM) en `deploy_cluster.sh`. Si solo puedes usar `t2.micro`, ten paciencia si el SSH se desconecta y simplemente vuelve a entrar.
 
 Asegúrate de estar dentro del nodo Master (el prompt debe decir `ubuntu@ip-...`). Si no lo estás, conéctate y clona el repositorio allí:
 
@@ -92,19 +94,23 @@ ssh -i hadoop-onpe-key.pem ubuntu@<IP_PÚBLICA_MASTER>
 # 2. Clona el repo DENTRO del Master
 git clone https://github.com/jflma/onpe-hadoop-cluster.git
 cd onpe-hadoop-cluster
-
-# 3. Ejecuta el script de carga
-bash upload_data.sh
 ```
 
-Este script:
-1. Descargará `data.zip` (1GB) desde Google Drive directo al Master.
-2. Descomprimirá la carpeta `data/` que contiene todos los archivos JSON (23GB).
-3. Creará toda la estructura de carpetas en HDFS (`/onpe/raw`, `/onpe/clean`, etc.).
-4. Subirá todos los JSONs a `/onpe/raw/`.
-5. Borrará los archivos locales del Master para liberar espacio.
+Debido al tamaño masivo de los datos (23GB), hemos dividido el proceso en dos partes:
 
-*Nota: Este proceso tomará varios minutos debido a la inmensa cantidad de información.*
+**Parte 1: Descarga y Extracción**
+Ejecuta el primer script. Este instalará las dependencias necesarias, descargará el archivo de 1GB desde Google Drive y lo extraerá a 23GB.
+```bash
+bash 1_download_data.sh
+```
+
+**Parte 2: Subida a HDFS**
+Una vez extraídos los datos, ejecuta el segundo script. Este creará toda la estructura de carpetas en HDFS (`/onpe/raw`, etc.) y moverá los 23GB de JSONs hacia el almacenamiento distribuido.
+```bash
+bash 2_upload_hdfs.sh
+```
+
+*Nota: La Parte 2 tomará bastante tiempo (15 a 30 minutos). Si tu conexión SSH se cae por falta de memoria RAM, puedes volver a entrar e intentar reanudar.*
 
 ### Paso 5: Ejecución de Jobs MapReduce 
 Una vez desarrollados y compilados los archivos `.jar` en la carpeta `jobs/`, puedes ejecutarlos desde el Master usando los scripts en la carpeta `scripts/`.
