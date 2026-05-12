@@ -10,7 +10,7 @@ FILE_NAME="data.zip"
 
 echo "=== 1. Instalando herramientas necesarias (gdown, unzip) ==="
 sudo apt-get update && sudo apt-get install -y python3-pip unzip
-pip3 install gdown --quiet
+pip3 install gdown
 
 echo "=== 2. Descargando archivo data.zip desde Google Drive ==="
 gdown "$DRIVE_ID" -O "$FILE_NAME"
