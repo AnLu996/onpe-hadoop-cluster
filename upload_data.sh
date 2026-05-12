@@ -13,7 +13,7 @@ sudo apt-get update && sudo apt-get install -y python3-pip unzip
 pip3 install gdown --quiet
 
 echo "=== 2. Descargando archivo data.zip desde Google Drive ==="
-gdown --id "$DRIVE_ID" -O "$FILE_NAME"
+gdown "$DRIVE_ID" -O "$FILE_NAME"
 
 if [ ! -f "$FILE_NAME" ]; then
     echo "Error: No se pudo descargar el archivo $FILE_NAME."
