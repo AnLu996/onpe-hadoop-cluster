@@ -12,7 +12,7 @@ echo "=== 1. Instalando herramientas necesarias (gdown, unzip) ==="
 sudo apt-get update && sudo apt-get install -y python3-pip unzip
 pip3 install gdown --quiet
 
-echo "=== 2. Descargando archivo data.zip (1GB aprox) desde Google Drive ==="
+echo "=== 2. Descargando archivo data.zip desde Google Drive ==="
 gdown --id "$DRIVE_ID" -O "$FILE_NAME"
 
 if [ ! -f "$FILE_NAME" ]; then
@@ -20,7 +20,7 @@ if [ ! -f "$FILE_NAME" ]; then
     exit 1
 fi
 
-echo "=== 2.1 Descomprimiendo archivo ZIP (Paciencia, son 23GB descomprimidos) ==="
+echo "=== 2.1 Descomprimiendo archivo ZIP ==="
 # El archivo extrae una carpeta 'data/'
 unzip -o "$FILE_NAME"
 
@@ -32,7 +32,7 @@ if [ ! -d "data" ]; then
     exit 1
 fi
 
-echo "=== 3. Preparando estructura completa en HDFS (Tarea 1.2) ==="
+echo "=== 3. Preparando estructura completa en HDFS  ==="
 hdfs dfs -mkdir -p /onpe/raw
 hdfs dfs -mkdir -p /onpe/clean
 hdfs dfs -mkdir -p /onpe/output
@@ -47,7 +47,7 @@ echo "=== 4. Subiendo datos a HDFS (Subiendo contenido de carpeta data) ==="
 # Sube todos los json dentro de 'data' al directorio /onpe/raw/
 hdfs dfs -put -f data/* /onpe/raw/
 
-echo "=== 5. Verificación de carga (Tarea 1.3) ==="
+echo "=== 5. Verificación de carga ==="
 echo "Total de archivos subidos:"
 hdfs dfs -ls /onpe/raw/ | wc -l
 
