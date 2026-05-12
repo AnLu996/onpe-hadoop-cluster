@@ -8,7 +8,7 @@ KEY_NAME="${CLUSTER_NAME}-key"
 SG_NAME="${CLUSTER_NAME}-sg"
 INSTANCE_TYPE="t2.micro"
 NODE_COUNT=4
-REGION=$(aws configure get region)
+REGION=$(aws configure get region || true)
 
 if [ -z "$REGION" ]; then
   REGION="us-east-1"
