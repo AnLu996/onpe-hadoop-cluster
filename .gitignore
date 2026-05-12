@@ -1,0 +1,7 @@
+*.txt
+aws
+hadoop-onpe-key.pem  
+hosts_hadoop
+user_data.sh
+configure_node.sh
+pasos.txt
