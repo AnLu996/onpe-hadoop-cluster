@@ -1,3 +1,89 @@
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+* {
+  font-family: "Outfit", sans-serif;
+}
+
+.font-mono,
+code {
+  font-family: "Fira Code", monospace !important;
+}
+
+@keyframes orb1 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(40px, -50px) scale(1.06);
+  }
+  66% {
+    transform: translate(-30px, -30px) scale(0.96);
+  }
+}
+@keyframes orb2 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-50px, 40px) scale(1.08);
+  }
+}
+@keyframes orb3 {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  40% {
+    transform: translate(30px, -60px) scale(1.04);
+  }
+  80% {
+    transform: translate(-20px, 20px) scale(0.98);
+  }
+}
+
+.orb-1 {
+  animation: orb1 20s ease-in-out infinite;
+}
+.orb-2 {
+  animation: orb2 15s ease-in-out infinite;
+  animation-delay: -4s;
+}
+.orb-3 {
+  animation: orb3 18s ease-in-out infinite;
+  animation-delay: -8s;
+}
+.orb-4 {
+  animation: orb2 22s ease-in-out infinite;
+  animation-delay: -11s;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+::selection {
+  background: rgba(96, 165, 250, 0.35);
+  color: #fff;
+}
+
+option {
+  background: #0c1220;
+  color: #e2e8f0;
+}
