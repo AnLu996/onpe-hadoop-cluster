@@ -7,8 +7,13 @@
 DRIVE_ID="1HxNfJxIrVPCL8UE83IAQrZ0kjgwdzFkh"
 FILE_NAME="data.zip"
 
+echo "=== 0. Instalando dependencias base ==="
+sudo apt update
+sudo apt install -y python3-pip python3-venv unzip
+
 echo "=== 1. Instalando gdown ==="
-python3 -m pip install gdown
+python3 -m pip install --user gdown
+export PATH="$HOME/.local/bin:$PATH"
 
 echo "=== 2. Descargando archivo data.zip desde Google Drive ==="
 python3 -m gdown "$DRIVE_ID" -O "$FILE_NAME"
