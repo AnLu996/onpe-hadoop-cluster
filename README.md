@@ -2,7 +2,7 @@
 
 Este proyecto implementa una arquitectura Big Data para procesar datos electorales de la ONPE usando un clúster Hadoop de 4 nodos en AWS EC2.
 
-El objetivo es automatizar el levantamiento del clúster, cargar datos de actas electorales en HDFS, realizar una limpieza distribuida de los datos y ejecutar consultas mediante trabajos MapReduce con **Hadoop Streaming + Python**.
+El objetivo es automatizar el levantamiento del clúster, cargar datos de actas electorales en HDFS, realizar una limpieza distribuida de los datos y ejecutar consultas mediante trabajos MapReduce con Hadoop Streaming.
 
 ---
 
@@ -667,7 +667,152 @@ Ver: historial de jobs, logs de ejecución
 
 ---
 
-## 13. Ejecución Completa (Paso a Paso)
+## 13. Permisos y Ejecución de Jobs
+
+### 13.1 Establecer Permisos para Todos los Scripts
+
+**IMPORTANTE:** Desde el nodo Master, dentro del repositorio clonado, ejecuta:
+
+```bash
+chmod +x jobs/limpieza_actas/*.py jobs/limpieza_actas/*.sh
+chmod +x jobs/actas_resumen/*.py jobs/actas_resumen/*.sh
+chmod +x jobs/conteo_lineas/*.py jobs/conteo_lineas/*.sh
+chmod +x jobs/votos_nacional/*.py jobs/votos_nacional/*.sh
+chmod +x jobs/votos_region/*.py jobs/votos_region/*.sh
+chmod +x jobs/votos_especiales/*.py jobs/votos_especiales/*.sh
+chmod +x jobs/actas_estado/*.py jobs/actas_estado/*.sh
+```
+
+Esto garantiza que todos los scripts Python y shell sean ejecutables por Hadoop.
+
+### 13.2 Orden de Ejecución Recomendado
+
+**Paso 1: Verificar datos raw en HDFS**
+
+Primero asegúrate de que la data raw esté disponible:
+
+```bash
+hdfs dfs -ls /onpe/raw
+hdfs dfs -cat /onpe/raw/actas_onpe_raw.jsonl | head -3
+```
+
+Si falta la data, cárgala:
+
+```bash
+hdfs dfs -put -f data/actas_onpe_raw.jsonl /onpe/raw/
+```
+
+**Paso 2: Ejecutar limpieza (Estudiante 2)**
+
+```bash
+cd jobs/limpieza_actas
+bash run_limpieza.sh
+```
+
+Valida que se completó:
+
+```bash
+hdfs dfs -ls /onpe/clean/actas_limpias_tsv/
+```
+
+**Paso 3: Ejecutar resumen de actas**
+
+```bash
+cd ../actas_resumen
+bash run_resumen.sh
+```
+
+Valida que se completó:
+
+```bash
+hdfs dfs -ls /onpe/clean/actas_resumen_tsv/
+```
+
+**Paso 4: Ejecutar jobs de Estudiante 3 (MapReduce)**
+
+Ejecuta en este orden:
+
+```bash
+cd ../conteo_lineas
+bash run_conteo.sh
+echo "✓ Conteo completado"
+
+cd ../votos_nacional
+bash run_votos_nacional.sh
+echo "✓ Votos nacional completado"
+
+cd ../votos_region
+bash run_votos_region.sh
+echo "✓ Votos región completado"
+
+cd ../votos_especiales
+bash run_votos_especiales.sh
+echo "✓ Votos especiales completado"
+
+cd ../actas_estado
+bash run_actas_estado.sh
+echo "✓ Actas estado completado"
+
+cd ../indice_invertido
+bash run_indice.sh
+echo "✓ Índice invertido completado"
+```
+
+---
+
+## 14. Visualización de Resultados en HDFS
+
+### 14.1 Listar Todos los Resultados
+
+```bash
+hdfs dfs -ls /onpe/output
+```
+
+Salida esperada:
+```
+drwxr-xr-x   - ubuntu supergroup          0 2026-05-13 XX:XX /onpe/output/conteo_lineas
+drwxr-xr-x   - ubuntu supergroup          0 2026-05-13 XX:XX /onpe/output/votos_nacional
+drwxr-xr-x   - ubuntu supergroup          0 2026-05-13 XX:XX /onpe/output/votos_region
+drwxr-xr-x   - ubuntu supergroup          0 2026-05-13 XX:XX /onpe/output/votos_especiales
+drwxr-xr-x   - ubuntu supergroup          0 2026-05-13 XX:XX /onpe/output/actas_estado
+drwxr-xr-x   - ubuntu supergroup          0 2026-05-13 XX:XX /onpe/output/indice_invertido
+```
+
+### 14.2 Ver Resultados Individuales
+
+**Votos Nacionales (top 30):**
+
+```bash
+hdfs dfs -cat /onpe/output/votos_nacional/part-00000 | head -30
+```
+
+**Votos por Región (top 30):**
+
+```bash
+hdfs dfs -cat /onpe/output/votos_region/part-00000 | head -30
+```
+
+**Votos Especiales (todos):**
+
+```bash
+hdfs dfs -cat /onpe/output/votos_especiales/part-00000
+```
+
+**Actas por Estado:**
+
+```bash
+hdfs dfs -cat /onpe/output/actas_estado/part-00000
+```
+
+**Índice Invertido (primeros 20 términos):**
+
+```bash
+hdfs dfs -cat /onpe/output/indice_invertido/part-00000 | head -20
+```
+
+---
+
+## 15. Ejecución Completa (Paso a Paso)
 
 Desde AWS CloudShell:
 
@@ -696,11 +841,20 @@ cd onpe-hadoop-cluster
 hdfs dfs -mkdir -p /onpe/raw /onpe/clean /onpe/output
 hdfs dfs -put -f data/actas_onpe_raw.jsonl /onpe/raw/
 
-# 4. Limpieza (Estudiante 2)
+# 4. Establecer permisos
+chmod +x jobs/limpieza_actas/*.py jobs/limpieza_actas/*.sh
+chmod +x jobs/actas_resumen/*.py jobs/actas_resumen/*.sh
+chmod +x jobs/conteo_lineas/*.py jobs/conteo_lineas/*.sh
+chmod +x jobs/votos_nacional/*.py jobs/votos_nacional/*.sh
+chmod +x jobs/votos_region/*.py jobs/votos_region/*.sh
+chmod +x jobs/votos_especiales/*.py jobs/votos_especiales/*.sh
+chmod +x jobs/actas_estado/*.py jobs/actas_estado/*.sh
+
+# 5. Limpieza (Estudiante 2)
 cd jobs/limpieza_actas && bash run_limpieza.sh && cd ../..
 cd jobs/actas_resumen && bash run_resumen.sh && cd ../..
 
-# 5. MapReduce (Estudiante 3)
+# 6. MapReduce (Estudiante 3)
 cd jobs/conteo_lineas && bash run_conteo.sh && cd ../..
 cd jobs/votos_nacional && bash run_votos_nacional.sh && cd ../..
 cd jobs/votos_region && bash run_votos_region.sh && cd ../..
@@ -708,14 +862,14 @@ cd jobs/votos_especiales && bash run_votos_especiales.sh && cd ../..
 cd jobs/actas_estado && bash run_actas_estado.sh && cd ../..
 cd jobs/indice_invertido && bash run_indice.sh && cd ../..
 
-# 6. Ver resultados
+# 7. Ver resultados
 hdfs dfs -ls /onpe/output
-hdfs dfs -cat /onpe/output/votos_nacional/part-00000 | head
+hdfs dfs -cat /onpe/output/votos_nacional/part-00000 | head -20
 ```
 
 ---
 
-## 14. División de Responsabilidades
+## 16. División de Responsabilidades
 
 ### Estudiante 1: Infraestructura y Datos
 
@@ -765,7 +919,7 @@ hdfs dfs -cat /onpe/output/votos_nacional/part-00000 | head
 
 ---
 
-## 15. Tecnología: Hadoop Streaming
+## 17. Tecnología: Hadoop Streaming
 
 **Ventajas de Hadoop Streaming:**
 
@@ -812,7 +966,7 @@ if current_party:
 
 ---
 
-## 16. Notas Importantes
+## 18. Notas Importantes
 
 ### ⚠️ Sobre el Master
 
@@ -850,7 +1004,7 @@ Alternativa: Aumentar a 3, pero necesita 3x espacio
 
 ---
 
-## 17. Destruir el Clúster
+## 19. Destruir el Clúster
 
 **IMPORTANTE:** Para evitar cargos innecesarios en AWS Academy:
 
@@ -866,7 +1020,7 @@ Esto elimina:
 
 ---
 
-## 18. Troubleshooting
+## 20. Troubleshooting
 
 ### Error: "No such file or directory: /onpe/raw"
 
@@ -903,9 +1057,18 @@ hdfs dfs -cat /onpe/clean/actas_limpias_tsv/part-00000 | head
 hdfs dfs -cat /onpe/clean/actas_limpias_tsv/part-00000 | cut -f1-5 | head
 ```
 
+### Error: "Permission denied" al ejecutar scripts
+
+```bash
+# Solución: Establece permisos correctos
+chmod +x jobs/*/mapper_*.py
+chmod +x jobs/*/reducer_*.py
+chmod +x jobs/*/*.sh
+```
+
 ---
 
-## 19. Evidencias para Informe Final
+## 21. Evidencias para Informe Final
 
 Captura pantalla de:
 
@@ -929,7 +1092,7 @@ Captura pantalla de:
 
 ---
 
-## 20. Referencias Útiles
+## 22. Referencias Útiles
 
 **Documentación oficial:**
 - [Apache Hadoop](https://hadoop.apache.org/)
@@ -942,7 +1105,7 @@ Captura pantalla de:
 
 ---
 
-## 21. Contacto y Preguntas
+## 23. Contacto y Preguntas
 
 Para dudas sobre infraestructura: Estudiante 1
 Para dudas sobre limpieza: Estudiante 2
@@ -951,4 +1114,4 @@ Para dudas sobre MapReduce: Estudiante 3
 ---
 
 **Última actualización:** 2026-05-13
-**Versión:** 2.0 (Hadoop Streaming + División de trabajo)
+**Versión:** 2.1 (Hadoop Streaming + División de trabajo + Guía completa de permisos y ejecución)
