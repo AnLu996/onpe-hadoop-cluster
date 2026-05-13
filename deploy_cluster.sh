@@ -6,8 +6,11 @@ set -e
 CLUSTER_NAME="hadoop-onpe"
 KEY_NAME="${CLUSTER_NAME}-key"
 SG_NAME="${CLUSTER_NAME}-sg"
-INSTANCE_TYPE="t3.medium"
-NODE_COUNT=4
+MASTER_INSTANCE_TYPE="t3.medium"
+WORKER_INSTANCE_TYPE="t3.medium"
+MASTER_VOLUME_SIZE=60
+WORKER_VOLUME_SIZE=40
+WORKER_COUNT=3
 REGION=$(aws configure get region || true)
 
 if [ -z "$REGION" ]; then
@@ -126,23 +129,43 @@ chown -R ubuntu:ubuntu /home/ubuntu/hadoopdata
 echo "export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64" >> /opt/hadoop/etc/hadoop/hadoop-env.sh
 EOF
 
+# LANZAR MASTER
+echo "Lanzando nodo master..."
 
-# LANZAR 4 INSTANCIAS
-echo "Lanzando $NODE_COUNT instancias..."
-
-
-INSTANCE_IDS=$(aws ec2 run-instances \
+MASTER_ID=$(aws ec2 run-instances \
   --image-id "$AMI_ID" \
-  --instance-type "$INSTANCE_TYPE" \
-  --count "$NODE_COUNT" \
+  --instance-type "$MASTER_INSTANCE_TYPE" \
+  --count 1 \
   --key-name "$KEY_NAME" \
   --security-group-ids "$SG_ID" \
-  --block-device-mappings '[{"DeviceName":"/dev/sda1","Ebs":{"VolumeSize":40,"VolumeType":"gp3","DeleteOnTermination":true}}]' \
+  --block-device-mappings "[{\"DeviceName\":\"/dev/sda1\",\"Ebs\":{\"VolumeSize\":${MASTER_VOLUME_SIZE},\"VolumeType\":\"gp3\",\"DeleteOnTermination\":true}}]" \
   --user-data file://user_data.sh \
-  --tag-specifications "ResourceType=instance,Tags=[{Key=Project,Value='"$CLUSTER_NAME"'}]" \
+  --tag-specifications "ResourceType=instance,Tags=[{Key=Project,Value=${CLUSTER_NAME}},{Key=Role,Value=master},{Key=Name,Value=${CLUSTER_NAME}-master}]" \
+  --query "Instances[0].InstanceId" \
+  --output text)
+
+echo "Master creado: $MASTER_ID"
+
+
+# LANZAR WORKERS
+echo "Lanzando $WORKER_COUNT workers..."
+
+WORKER_IDS=$(aws ec2 run-instances \
+  --image-id "$AMI_ID" \
+  --instance-type "$WORKER_INSTANCE_TYPE" \
+  --count "$WORKER_COUNT" \
+  --key-name "$KEY_NAME" \
+  --security-group-ids "$SG_ID" \
+  --block-device-mappings "[{\"DeviceName\":\"/dev/sda1\",\"Ebs\":{\"VolumeSize\":${WORKER_VOLUME_SIZE},\"VolumeType\":\"gp3\",\"DeleteOnTermination\":true}}]" \
+  --user-data file://user_data.sh \
+  --tag-specifications "ResourceType=instance,Tags=[{Key=Project,Value=${CLUSTER_NAME}},{Key=Role,Value=worker}]" \
   --query "Instances[*].InstanceId" \
   --output text)
 
+echo "Workers creados:"
+echo "$WORKER_IDS"
+
+INSTANCE_IDS="$MASTER_ID $WORKER_IDS"
 
 echo "Instancias creadas:"
 echo "$INSTANCE_IDS"
@@ -152,17 +175,15 @@ aws ec2 wait instance-running --instance-ids $INSTANCE_IDS
 
 
 # ASIGNAR NOMBRES
-i=0
-for ID in $INSTANCE_IDS; do
-  if [ "$i" -eq 0 ]; then
-    NAME="master"
-  else
-    NAME="worker$i"
-  fi
+aws ec2 create-tags \
+  --resources "$MASTER_ID" \
+  --tags Key=Name,Value="${CLUSTER_NAME}-master"
 
+i=1
+for ID in $WORKER_IDS; do
   aws ec2 create-tags \
     --resources "$ID" \
-    --tags Key=Name,Value="${CLUSTER_NAME}-${NAME}"
+    --tags Key=Name,Value="${CLUSTER_NAME}-worker$i"
 
   i=$((i+1))
 done

@@ -60,7 +60,7 @@ cat > /opt/hadoop/etc/hadoop/hdfs-site.xml <<XML
 <configuration>
     <property>
         <name>dfs.replication</name>
-        <value>3</value>
+        <value>1</value>
     </property>
 
     <property>
