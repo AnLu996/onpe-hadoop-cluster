@@ -1,53 +1,85 @@
 import PropTypes from "prop-types";
 
 const ACCENTS = {
-  blue: { icon: "bg-blue-500/20 text-blue-300", line: "via-blue-400/60", glow: "bg-blue-600/25" },
+  red: {
+    line:      "var(--clr-red)",
+    iconBg:    "rgba(200,16,46,0.12)",
+    iconColor: "var(--clr-red)",
+  },
+  gold: {
+    line:      "var(--clr-gold)",
+    iconBg:    "rgba(196,134,10,0.12)",
+    iconColor: "var(--clr-gold)",
+  },
+  blue: {
+    line:      "#3b82f6",
+    iconBg:    "rgba(59,130,246,0.12)",
+    iconColor: "#60a5fa",
+  },
   purple: {
-    icon: "bg-purple-500/20 text-purple-300",
-    line: "via-purple-400/60",
-    glow: "bg-purple-600/25",
+    line:      "#a855f7",
+    iconBg:    "rgba(168,85,247,0.12)",
+    iconColor: "#c084fc",
   },
-  indigo: {
-    icon: "bg-indigo-500/20 text-indigo-300",
-    line: "via-indigo-400/60",
-    glow: "bg-indigo-600/25",
-  },
-  cyan: { icon: "bg-cyan-500/20 text-cyan-300", line: "via-cyan-400/60", glow: "bg-cyan-600/25" },
 };
 
-export default function StatCard({ icon: Icon, label, value, sub, color = "blue" }) {
-  const c = ACCENTS[color];
+export default function StatCard({ icon: Icon, label, value, sub, color = "red" }) {
+  const c = ACCENTS[color] ?? ACCENTS.red;
+
   return (
     <div
-      style={{ backdropFilter: "blur(28px)" }}
-      className="relative bg-white/[0.06] border border-white/[0.11] rounded-2xl p-5 overflow-hidden group hover:bg-white/[0.09] transition-all duration-300 cursor-default"
+      className="rounded-xl overflow-hidden cursor-default transition-transform duration-200 hover:-translate-y-[2px]"
+      style={{
+        background: "var(--clr-surface)",
+        border:     "1px solid var(--clr-border)",
+        boxShadow:  "0 4px 28px rgba(0,0,0,0.4)",
+      }}
     >
+      {/* Accent line */}
       <div
-        className={`absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent ${c.line} to-transparent`}
+        className="h-[1.5px]"
+        style={{
+          background: `linear-gradient(90deg, ${c.line} 0%, ${c.line}55 45%, transparent 100%)`,
+        }}
       />
-      <div
-        className={`absolute -top-8 -right-8 w-24 h-24 ${c.glow} rounded-full blur-2xl opacity-50 group-hover:opacity-80 transition-opacity duration-500`}
-      />
-      <div className="relative flex flex-col gap-3">
-        <div className="flex items-center gap-2.5">
-          <div className={`p-2 rounded-xl ${c.icon} flex-shrink-0`}>
-            <Icon className="w-4 h-4" />
-          </div>
-          <span className="text-white/45 text-[11px] font-medium tracking-widest uppercase">
+
+      <div className="p-5">
+        <div className="flex items-start justify-between mb-4">
+          <span
+            className="text-[9px] uppercase tracking-[0.22em] font-semibold"
+            style={{ color: "var(--clr-text-2)" }}
+          >
             {label}
           </span>
+          <div
+            className="p-1.5 rounded-lg flex-shrink-0"
+            style={{ background: c.iconBg }}
+          >
+            <Icon className="w-3.5 h-3.5" style={{ color: c.iconColor }} />
+          </div>
         </div>
-        <p className="text-[2rem] font-bold text-white leading-none tracking-tight">{value}</p>
-        {sub && <p className="text-white/30 text-xs">{sub}</p>}
+
+        <p
+          className="font-display text-[2.75rem] leading-none mb-1.5 tabular-nums"
+          style={{ color: "var(--clr-text)" }}
+        >
+          {value}
+        </p>
+
+        {sub && (
+          <p className="text-[11px]" style={{ color: "var(--clr-text-3)" }}>
+            {sub}
+          </p>
+        )}
       </div>
     </div>
   );
 }
 
 StatCard.propTypes = {
-  icon: PropTypes.elementType.isRequired,
+  icon:  PropTypes.elementType.isRequired,
   label: PropTypes.string.isRequired,
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-  sub: PropTypes.string,
-  color: PropTypes.oneOf(["blue", "purple", "indigo", "cyan"]),
+  sub:   PropTypes.string,
+  color: PropTypes.oneOf(["red", "gold", "blue", "purple"]),
 };

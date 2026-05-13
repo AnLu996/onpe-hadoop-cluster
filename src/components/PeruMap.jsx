@@ -43,19 +43,55 @@ export default function PeruMap({
 
   return (
     <div
-      style={{ backdropFilter: "blur(28px)" }}
-      className="bg-white/[0.06] border border-white/[0.11] rounded-2xl p-5 h-full flex flex-col"
+      className="rounded-xl overflow-hidden p-5 h-full flex flex-col"
+      style={{
+        background: "var(--clr-surface)",
+        border:     "1px solid var(--clr-border)",
+        boxShadow:  "0 4px 32px rgba(0,0,0,0.45)",
+      }}
     >
+      {/* Red accent line */}
+      <div
+        className="h-[1.5px] -mx-5 -mt-5 mb-4"
+        style={{ background: "linear-gradient(90deg, var(--clr-red) 0%, transparent 60%)" }}
+      />
+
       <div className="flex items-start justify-between mb-3 gap-2">
-        <div>
-          <p className="text-[11px] text-white/35 uppercase tracking-widest mb-0.5">Geografía</p>
-          <h2 className="text-base font-semibold text-white/85">Mapa Electoral</h2>
+        <div className="flex items-center gap-2.5">
+          <div
+            className="w-[3px] h-5 rounded-full flex-shrink-0"
+            style={{ background: "var(--clr-red)" }}
+          />
+          <div>
+            <p
+              className="text-[9px] uppercase tracking-[0.22em] font-semibold"
+              style={{ color: "var(--clr-text-3)" }}
+            >
+              Geografía
+            </p>
+            <h2 className="text-sm font-semibold" style={{ color: "var(--clr-text)" }}>
+              Mapa Electoral
+            </h2>
+          </div>
         </div>
         {onToggleView && (
           <button
             type="button"
             onClick={onToggleView}
-            className="flex-shrink-0 text-[11px] px-3 py-1.5 rounded-xl bg-white/[0.08] border border-white/[0.12] text-white/60 hover:bg-white/[0.12] hover:text-white/80 transition-all"
+            className="flex-shrink-0 text-[10px] px-3 py-1.5 rounded-lg border font-semibold uppercase tracking-wider transition-all duration-150"
+            style={{
+              background:   "var(--clr-elevated)",
+              borderColor:  "var(--clr-border)",
+              color:        "var(--clr-text-2)",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = "var(--clr-red-border)";
+              e.currentTarget.style.color = "var(--clr-red)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = "var(--clr-border)";
+              e.currentTarget.style.color = "var(--clr-text-2)";
+            }}
           >
             {viewMode === "participacion" ? "Ver ganador" : "Ver participación"}
           </button>
@@ -68,10 +104,10 @@ export default function PeruMap({
           {PART_SCALE.map((s) => (
             <div key={s.label} className="flex items-center gap-1.5">
               <span
-                className="inline-block w-2.5 h-2.5 rounded-sm flex-shrink-0"
+                className="inline-block w-2 h-2 rounded-sm flex-shrink-0"
                 style={{ background: s.color }}
               />
-              <span className="text-[11px] text-white/35">{s.label}</span>
+              <span className="text-[10px]" style={{ color: "var(--clr-text-2)" }}>{s.label}</span>
             </div>
           ))}
         </div>
@@ -82,10 +118,10 @@ export default function PeruMap({
             return (
               <div key={partido} className="flex items-center gap-1.5">
                 <span
-                  className="inline-block w-2.5 h-2.5 rounded-full flex-shrink-0"
+                  className="inline-block w-2 h-2 rounded-full flex-shrink-0"
                   style={{ background: color }}
                 />
-                <span className="text-[11px] text-white/35 truncate max-w-[120px]">{partido}</span>
+                <span className="text-[10px] truncate max-w-[120px]" style={{ color: "var(--clr-text-2)" }}>{partido}</span>
               </div>
             );
           })}
@@ -140,8 +176,8 @@ export default function PeruMap({
           </ComposableMap>
         ) : (
           <div
-            className="flex items-center justify-center text-white/25 text-sm"
-            style={{ height: "690px" }}
+            className="flex items-center justify-center text-sm"
+            style={{ height: "690px", color: "var(--clr-text-3)" }}
           >
             Cargando mapa…
           </div>
@@ -150,48 +186,74 @@ export default function PeruMap({
         {/* Tooltip */}
         {tooltip && (
           <div
-            style={{ backdropFilter: "blur(24px)" }}
-            className="absolute top-3 right-3 bg-black/75 border border-white/20 rounded-xl p-3.5 shadow-2xl z-50 min-w-[165px] pointer-events-none"
+            className="absolute top-3 right-3 rounded-xl p-3.5 shadow-2xl z-50 min-w-[160px] pointer-events-none slide-in"
+            style={{
+              background:  "var(--clr-elevated)",
+              border:      "1px solid var(--clr-border-med)",
+              boxShadow:   "0 8px 32px rgba(0,0,0,0.65)",
+            }}
           >
-            <p className="font-bold text-sm text-white/90 mb-2.5">{tooltip.name || "—"}</p>
+            <p
+              className="font-semibold text-sm mb-2.5 pb-2"
+              style={{
+                color:        "var(--clr-text)",
+                borderBottom: "1px solid var(--clr-border)",
+              }}
+            >
+              {tooltip.name || "—"}
+            </p>
             {tooltip.partData ? (
               <div className="space-y-1.5 text-xs">
                 <div className="flex justify-between gap-6">
-                  <span className="text-white/40">Participación</span>
-                  <span className="font-semibold text-white/90">
+                  <span style={{ color: "var(--clr-text-2)" }}>Participación</span>
+                  <span className="font-semibold tabular-nums" style={{ color: "var(--clr-text)" }}>
                     {tooltip.partData.participacion}%
                   </span>
                 </div>
-                <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
+                <div
+                  className="w-full h-[2px] rounded-full overflow-hidden"
+                  style={{ background: "rgba(255,255,255,0.05)" }}
+                >
                   <div
-                    className="h-full bg-gradient-to-r from-blue-600 to-sky-400 rounded-full"
-                    style={{ width: `${tooltip.partData.participacion}%` }}
+                    className="h-full rounded-full"
+                    style={{
+                      width:      `${tooltip.partData.participacion}%`,
+                      background: "linear-gradient(90deg, var(--clr-red), #ff4060)",
+                    }}
                   />
                 </div>
                 <div className="flex justify-between gap-6 pt-0.5">
-                  <span className="text-white/40">Mesas</span>
-                  <span className="font-semibold text-white/90">
+                  <span style={{ color: "var(--clr-text-2)" }}>Mesas</span>
+                  <span className="font-semibold tabular-nums" style={{ color: "var(--clr-text)" }}>
                     {tooltip.partData.mesas.toLocaleString("es-PE")}
                   </span>
                 </div>
-                <div className="flex items-center justify-between gap-4 pt-1.5 border-t border-white/10">
-                  <span className="text-white/40">Estado</span>
+                <div
+                  className="flex items-center justify-between gap-4 pt-1.5"
+                  style={{ borderTop: "1px solid var(--clr-border)" }}
+                >
+                  <span style={{ color: "var(--clr-text-2)" }}>Estado</span>
                   <div className="flex items-center gap-1.5">
                     <span
                       className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${ESTADO_DOT[tooltip.partData.estado] ?? "bg-slate-400"}`}
                     />
-                    <span className="font-medium text-white/80">{tooltip.partData.estado}</span>
+                    <span className="font-medium" style={{ color: "var(--clr-text)" }}>
+                      {tooltip.partData.estado}
+                    </span>
                   </div>
                 </div>
                 {tooltip.winData && (
-                  <div className="flex items-center justify-between gap-4 pt-1.5 border-t border-white/10">
-                    <span className="text-white/40">Ganador</span>
+                  <div
+                    className="flex items-center justify-between gap-4 pt-1.5"
+                    style={{ borderTop: "1px solid var(--clr-border)" }}
+                  >
+                    <span style={{ color: "var(--clr-text-2)" }}>Ganador</span>
                     <div className="flex items-center gap-1.5">
                       <span
                         className="w-1.5 h-1.5 rounded-full flex-shrink-0"
                         style={{ background: tooltip.winData.color }}
                       />
-                      <span className="font-medium text-white/80 text-[10px]">
+                      <span className="font-medium text-[10px]" style={{ color: "var(--clr-text)" }}>
                         {tooltip.winData.partido}
                       </span>
                     </div>
@@ -199,7 +261,7 @@ export default function PeruMap({
                 )}
               </div>
             ) : (
-              <p className="text-white/25 text-xs">Sin datos disponibles</p>
+              <p className="text-xs" style={{ color: "var(--clr-text-3)" }}>Sin datos disponibles</p>
             )}
           </div>
         )}

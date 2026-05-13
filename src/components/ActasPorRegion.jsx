@@ -11,18 +11,22 @@ import {
 } from "recharts";
 import GlassTooltip from "./GlassTooltip";
 import Panel from "./Panel";
+import { PanelHeader } from "./RankingPartidos";
 
 export default function ActasPorRegion({ data }) {
   return (
     <Panel className="p-5">
-      <p className="text-[11px] text-white/35 uppercase tracking-widest mb-0.5">Distribución</p>
-      <h2 className="text-base font-semibold text-white/85 mb-4">Estado de Actas por Región</h2>
+      <PanelHeader eyebrow="Distribución" title="Estado de Actas por Región" />
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={data} layout="vertical" margin={{ top: 0, right: 20, bottom: 0, left: 10 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" horizontal={false} />
+          <CartesianGrid
+            strokeDasharray="3 3"
+            stroke="rgba(255,255,255,0.04)"
+            horizontal={false}
+          />
           <XAxis
             type="number"
-            tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 10 }}
+            tick={{ fill: "var(--clr-text-2)", fontSize: 10 }}
             axisLine={false}
             tickLine={false}
           />
@@ -30,21 +34,27 @@ export default function ActasPorRegion({ data }) {
             type="category"
             dataKey="region"
             width={82}
-            tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 11 }}
+            tick={{ fill: "var(--clr-text-2)", fontSize: 11 }}
             axisLine={false}
             tickLine={false}
           />
-          <Tooltip content={<GlassTooltip />} cursor={{ fill: "rgba(255,255,255,0.03)" }} />
+          <Tooltip content={<GlassTooltip />} cursor={{ fill: "rgba(255,255,255,0.025)" }} />
           <Legend
-            iconType="circle"
-            iconSize={7}
+            iconType="square"
+            iconSize={6}
             formatter={(v) => (
-              <span style={{ color: "rgba(255,255,255,0.5)", fontSize: 12 }}>{v}</span>
+              <span style={{ color: "var(--clr-text-2)", fontSize: 11 }}>{v}</span>
             )}
           />
-          <Bar dataKey="contabilizada" name="Contabilizada" stackId="a" fill="#34d399" />
-          <Bar dataKey="observada" name="Observada" stackId="a" fill="#fbbf24" />
-          <Bar dataKey="sinActa" name="Sin acta" stackId="a" fill="#f87171" radius={[0, 4, 4, 0]} />
+          <Bar dataKey="contabilizada" name="Contabilizada" stackId="a" fill="#10b981" />
+          <Bar dataKey="observada"     name="Observada"     stackId="a" fill="#f59e0b" />
+          <Bar
+            dataKey="sinActa"
+            name="Sin acta"
+            stackId="a"
+            fill="#ef4444"
+            radius={[0, 4, 4, 0]}
+          />
         </BarChart>
       </ResponsiveContainer>
     </Panel>

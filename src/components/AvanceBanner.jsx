@@ -5,36 +5,85 @@ const fmt = (n) => Number(n).toLocaleString("es-PE");
 export default function AvanceBanner({ actas, totalEsperadas, avanceConteo }) {
   return (
     <div
-      style={{ backdropFilter: "blur(28px)" }}
-      className="bg-white/[0.06] border border-white/[0.11] rounded-2xl px-5 py-4"
+      className="rounded-xl overflow-hidden"
+      style={{
+        background: "var(--clr-surface)",
+        border:     "1px solid var(--clr-red-border)",
+        boxShadow:  "0 0 48px rgba(200,16,46,0.07), 0 4px 24px rgba(0,0,0,0.4)",
+      }}
     >
-      <div className="flex items-center justify-between gap-4 mb-2.5">
-        <div className="flex items-center gap-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-white/45 text-[11px] font-medium uppercase tracking-widest">
-            Avance de conteo
-          </span>
+      {/* Full-width red top bar */}
+      <div className="h-[2px]" style={{ background: "var(--clr-red)" }} />
+
+      <div className="px-5 py-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          {/* Left side */}
+          <div className="flex items-center gap-4">
+            <div
+              className="flex items-center gap-2 px-3 py-1.5 rounded border flex-shrink-0"
+              style={{
+                background:   "var(--clr-red-dim)",
+                borderColor:  "var(--clr-red-border)",
+              }}
+            >
+              <span
+                className="blink w-1.5 h-1.5 rounded-full flex-shrink-0"
+                style={{ background: "var(--clr-red)" }}
+              />
+              <span
+                className="font-display text-[13px] tracking-wider"
+                style={{ color: "var(--clr-red)" }}
+              >
+                EN VIVO
+              </span>
+            </div>
+
+            <div>
+              <p className="text-sm font-semibold" style={{ color: "var(--clr-text)" }}>
+                Escrutinio Oficial · Elecciones Generales Perú 2026
+              </p>
+              <p className="text-[11px] mt-0.5" style={{ color: "var(--clr-text-2)" }}>
+                {fmt(actas)} actas contabilizadas de {fmt(totalEsperadas)} esperadas
+              </p>
+            </div>
+          </div>
+
+          {/* Right side: big % */}
+          <div className="flex items-baseline gap-1 flex-shrink-0">
+            <span
+              className="font-display text-[3.2rem] leading-none tabular-nums"
+              style={{ color: "var(--clr-text)" }}
+            >
+              {avanceConteo}
+            </span>
+            <span className="font-display text-2xl" style={{ color: "var(--clr-text-2)" }}>%</span>
+            <span className="text-[11px] ml-1.5" style={{ color: "var(--clr-text-3)" }}>
+              procesado
+            </span>
+          </div>
         </div>
-        <span className="text-white/80 font-bold text-sm">{avanceConteo}% completado</span>
-      </div>
 
-      <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+        {/* Progress bar */}
         <div
-          className="h-full bg-gradient-to-r from-blue-600 via-blue-400 to-emerald-400 rounded-full transition-all"
-          style={{ width: `${avanceConteo}%` }}
-        />
-      </div>
-
-      <div className="flex justify-between mt-2">
-        <span className="text-white/30 text-xs">{fmt(actas)} actas contabilizadas</span>
-        <span className="text-white/30 text-xs">Total esperado: {fmt(totalEsperadas)}</span>
+          className="mt-4 w-full h-[3px] rounded-full overflow-hidden"
+          style={{ background: "rgba(255,255,255,0.05)" }}
+        >
+          <div
+            className="h-full rounded-full transition-all duration-1000"
+            style={{
+              width:      `${avanceConteo}%`,
+              background: "linear-gradient(90deg, var(--clr-red) 0%, #ff3256 100%)",
+              boxShadow:  "0 0 10px rgba(200,16,46,0.6)",
+            }}
+          />
+        </div>
       </div>
     </div>
   );
 }
 
 AvanceBanner.propTypes = {
-  actas: PropTypes.number.isRequired,
+  actas:          PropTypes.number.isRequired,
   totalEsperadas: PropTypes.number.isRequired,
-  avanceConteo: PropTypes.number.isRequired,
+  avanceConteo:   PropTypes.number.isRequired,
 };

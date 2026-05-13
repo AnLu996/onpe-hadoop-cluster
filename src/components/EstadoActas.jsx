@@ -11,30 +11,34 @@ import {
 } from "recharts";
 import GlassTooltip from "./GlassTooltip";
 import Panel from "./Panel";
+import { PanelHeader } from "./RankingPartidos";
 
-const CHART_COLORS = ["#60a5fa", "#c084fc", "#fb923c"];
+const CHART_COLORS = ["#c8102e", "#a855f7", "#f97316"];
 
 export default function EstadoActas({ data }) {
   return (
     <Panel className="p-5">
-      <p className="text-[11px] text-white/35 uppercase tracking-widest mb-0.5">Estadísticas</p>
-      <h2 className="text-base font-semibold text-white/85 mb-4">Estado de Actas</h2>
+      <PanelHeader eyebrow="Estadísticas" title="Estado de Actas por Candidato" />
       <ResponsiveContainer width="100%" height={255}>
         <BarChart data={data} barCategoryGap="40%">
-          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+          <CartesianGrid
+            strokeDasharray="3 3"
+            stroke="rgba(255,255,255,0.04)"
+            vertical={false}
+          />
           <XAxis
             dataKey="nombre"
-            tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 11 }}
+            tick={{ fill: "var(--clr-text-2)", fontSize: 11 }}
             axisLine={false}
             tickLine={false}
           />
           <YAxis
-            tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 11 }}
+            tick={{ fill: "var(--clr-text-2)", fontSize: 11 }}
             axisLine={false}
             tickLine={false}
           />
-          <Tooltip content={<GlassTooltip />} cursor={{ fill: "rgba(255,255,255,0.03)" }} />
-          <Bar dataKey="votos" name="votos" radius={[8, 8, 0, 0]}>
+          <Tooltip content={<GlassTooltip />} cursor={{ fill: "rgba(255,255,255,0.025)" }} />
+          <Bar dataKey="votos" name="votos" radius={[6, 6, 0, 0]}>
             {data.map((_, i) => (
               <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
             ))}

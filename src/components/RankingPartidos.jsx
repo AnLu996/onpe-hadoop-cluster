@@ -16,14 +16,17 @@ import Panel from "./Panel";
 export default function RankingPartidos({ data }) {
   return (
     <Panel className="p-5">
-      <p className="text-[11px] text-white/35 uppercase tracking-widest mb-0.5">Resultados</p>
-      <h2 className="text-base font-semibold text-white/85 mb-4">Ranking de Partidos</h2>
+      <PanelHeader eyebrow="Resultados" title="Ranking de Partidos" />
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={data} layout="vertical" margin={{ top: 0, right: 55, bottom: 0, left: 10 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" horizontal={false} />
+          <CartesianGrid
+            strokeDasharray="3 3"
+            stroke="rgba(255,255,255,0.04)"
+            horizontal={false}
+          />
           <XAxis
             type="number"
-            tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 10 }}
+            tick={{ fill: "var(--clr-text-2)", fontSize: 10 }}
             axisLine={false}
             tickLine={false}
             tickFormatter={(v) => `${v}%`}
@@ -32,19 +35,19 @@ export default function RankingPartidos({ data }) {
             type="category"
             dataKey="corto"
             width={38}
-            tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 11 }}
+            tick={{ fill: "var(--clr-text-2)", fontSize: 11 }}
             axisLine={false}
             tickLine={false}
           />
-          <Tooltip content={<GlassTooltip />} cursor={{ fill: "rgba(255,255,255,0.03)" }} />
+          <Tooltip content={<GlassTooltip />} cursor={{ fill: "rgba(255,255,255,0.025)" }} />
           <Bar
             dataKey="porcentaje"
             name="porcentaje"
-            radius={[0, 6, 6, 0]}
+            radius={[0, 5, 5, 0]}
             label={{
-              position: "right",
-              fill: "rgba(255,255,255,0.45)",
-              fontSize: 11,
+              position:  "right",
+              fill:      "var(--clr-text-2)",
+              fontSize:  11,
               formatter: (v) => `${v}%`,
             }}
           >
@@ -60,4 +63,32 @@ export default function RankingPartidos({ data }) {
 
 RankingPartidos.propTypes = {
   data: PropTypes.array.isRequired,
+};
+
+export function PanelHeader({ eyebrow, title, className = "mb-4" }) {
+  return (
+    <div className={`flex items-center gap-2.5 ${className}`}>
+      <div
+        className="w-[3px] h-5 rounded-full flex-shrink-0"
+        style={{ background: "var(--clr-red)" }}
+      />
+      <div>
+        <p
+          className="text-[9px] uppercase tracking-[0.22em] font-semibold"
+          style={{ color: "var(--clr-text-3)" }}
+        >
+          {eyebrow}
+        </p>
+        <h2 className="text-sm font-semibold leading-tight" style={{ color: "var(--clr-text)" }}>
+          {title}
+        </h2>
+      </div>
+    </div>
+  );
+}
+
+PanelHeader.propTypes = {
+  eyebrow:   PropTypes.string.isRequired,
+  title:     PropTypes.string.isRequired,
+  className: PropTypes.string,
 };

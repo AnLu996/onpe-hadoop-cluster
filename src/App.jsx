@@ -1,177 +1,204 @@
-import { ChartBarIcon, DocumentTextIcon, MapPinIcon, UsersIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
-import ActasPorRegion from "./components/ActasPorRegion";
-import AvanceBanner from "./components/AvanceBanner";
-import DesglosVotos from "./components/DesglosVotos";
-import EstadoActas from "./components/EstadoActas";
-import MesasTable from "./components/MesasTable";
-import PeruMap from "./components/PeruMap";
-import PodioSection from "./components/PodioSection";
-import RankingPartidos from "./components/RankingPartidos";
-import StatCard from "./components/StatCard";
-import {
-  MOCK_ACTAS_REGION,
-  MOCK_CANDIDATOS,
-  MOCK_DESGLOSE_DATA,
-  MOCK_GANADOR_REGION,
-  MOCK_MESAS,
-  MOCK_REGION_MAP_DATA,
-  MOCK_REGIONES,
-  MOCK_STATS,
-  MOCK_VOTOS_NACIONAL,
-} from "./data/mock";
+import { MOCK_VOTOS_NACIONAL } from "./data/mock";
+import MesasView from "./views/MesasView";
+import NacionalView from "./views/NacionalView";
+import RegionesView from "./views/RegionesView";
 
-const fmt = (n) => Number(n).toLocaleString("es-PE");
+const TICKER_STR = MOCK_VOTOS_NACIONAL.map(
+  (d, i) => `${i + 1}° ${d.corto}  ${d.porcentaje}%`
+).join("     ·     ");
+
+const TABS = [
+  {
+    id:      "nacional",
+    label:   "Nacional",
+    eyebrow: "Resultados y candidatos",
+  },
+  {
+    id:      "regiones",
+    label:   "Regiones",
+    eyebrow: "Mapa electoral interactivo",
+  },
+  {
+    id:      "mesas",
+    label:   "Mesas",
+    eyebrow: "Estado del escrutinio",
+  },
+];
 
 export default function Dashboard() {
-  const [region, setRegion] = useState("");
-  const [search, setSearch] = useState("");
-  const [mapView, setMapView] = useState("participacion");
-
-  const mesas = MOCK_MESAS.filter(
-    (m) =>
-      !search || m.mesa.includes(search) || m.local.toLowerCase().includes(search.toLowerCase())
-  );
+  const [tab, setTab] = useState("nacional");
 
   return (
-    <div
-      className="relative min-h-screen text-white"
-      style={{ fontFamily: "'Outfit', sans-serif" }}
-    >
-      {/* ── BACKGROUND ORBS ── */}
-      <div className="fixed inset-0 -z-10 bg-[#040c1e]">
-        <div className="orb-1 absolute -top-[20%] -left-[10%]  w-[700px] h-[700px] rounded-full bg-blue-700/30   blur-[130px]" />
-        <div className="orb-2 absolute top-[20%]  -right-[12%] w-[600px] h-[600px] rounded-full bg-violet-700/22 blur-[120px]" />
-        <div className="orb-3 absolute bottom-[-8%] left-[25%]  w-[500px] h-[500px] rounded-full bg-indigo-700/18 blur-[110px]" />
-        <div className="orb-4 absolute top-[58%]  left-[5%]   w-[380px] h-[380px] rounded-full bg-sky-700/15    blur-[100px]" />
+    <div className="relative min-h-screen" style={{ color: "var(--clr-text)" }}>
+
+      {/* ── PERU FLAG STRIPE ── */}
+      <div className="fixed top-0 left-0 right-0 z-[60] flex h-[3px]">
+        <div className="flex-1" style={{ background: "var(--clr-red)" }} />
+        <div className="flex-1" style={{ background: "rgba(240,235,250,0.85)" }} />
+        <div className="flex-1" style={{ background: "var(--clr-red)" }} />
       </div>
 
       {/* ── HEADER ── */}
       <header
-        style={{ backdropFilter: "blur(32px)" }}
-        className="sticky top-0 z-50 bg-black/25 border-b border-white/[0.08] px-6 py-4"
+        className="sticky top-[3px] z-50"
+        style={{
+          background:   "rgba(12,11,19,0.97)",
+          borderBottom: "1px solid var(--clr-border)",
+        }}
       >
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4 flex-wrap">
-          <div className="flex items-center gap-3">
+        {/* Top row: branding */}
+        <div className="max-w-7xl mx-auto px-6 pt-4 pb-0 flex items-center gap-5">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <div
-              style={{ backdropFilter: "blur(12px)" }}
-              className="w-9 h-9 rounded-xl bg-blue-500/25 border border-blue-400/35 flex items-center justify-center flex-shrink-0"
-            >
-              <span className="text-blue-300 text-[9px] font-bold tracking-wider">ONPE</span>
-            </div>
+              className="w-[3px] h-7 rounded-full"
+              style={{ background: "var(--clr-red)" }}
+            />
             <div>
-              <h1 className="text-base font-bold text-white/90 tracking-tight leading-tight">
-                Dashboard Electoral Perú 2026
-              </h1>
-              <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-white/35 text-[11px]">
-                  Resultados en tiempo real · Primera vuelta
-                </span>
+              <div
+                className="font-display text-xl leading-none"
+                style={{ color: "var(--clr-red)", letterSpacing: "0.12em" }}
+              >
+                ONPE
+              </div>
+              <div
+                className="text-[8px] uppercase tracking-[0.2em]"
+                style={{ color: "var(--clr-text-3)" }}
+              >
+                Ofic. Nac. de Procesos Electorales
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5">
-            <span className="text-white/35 text-xs hidden sm:block">Región</span>
-            <select
-              style={{ backdropFilter: "blur(16px)" }}
-              className="bg-white/[0.08] border border-white/[0.14] text-white/85 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400/45 transition-all"
-              value={region}
-              onChange={(e) => setRegion(e.target.value)}
+          <div className="w-px h-8" style={{ background: "var(--clr-border)" }} />
+
+          <div className="min-w-0">
+            <h1 className="text-sm font-semibold leading-tight" style={{ color: "var(--clr-text)" }}>
+              Dashboard Electoral · Perú 2026
+            </h1>
+            <div className="flex items-center gap-2 mt-0.5">
+              <span
+                className="blink w-1.5 h-1.5 rounded-full flex-shrink-0"
+                style={{ background: "var(--clr-red)" }}
+              />
+              <span
+                className="text-[9px] uppercase tracking-[0.16em]"
+                style={{ color: "var(--clr-text-2)" }}
+              >
+                En vivo · Primera vuelta
+              </span>
+            </div>
+          </div>
+
+          {/* Tab nav — right-aligned on desktop, bleeds into the row */}
+          <div className="ml-auto hidden sm:flex items-end gap-1">
+            {TABS.map((t) => {
+              const active = tab === t.id;
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => setTab(t.id)}
+                  className="relative px-4 py-2.5 text-sm font-medium transition-all duration-150 rounded-t-lg"
+                  style={{
+                    color:      active ? "var(--clr-text)" : "var(--clr-text-2)",
+                    background: active ? "var(--clr-elevated)" : "transparent",
+                    borderTop:  active ? `2px solid var(--clr-red)` : "2px solid transparent",
+                  }}
+                >
+                  {t.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Mobile tabs */}
+        <div
+          className="sm:hidden flex border-t mt-3"
+          style={{ borderColor: "var(--clr-border)" }}
+        >
+          {TABS.map((t) => {
+            const active = tab === t.id;
+            return (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => setTab(t.id)}
+                className="flex-1 py-2.5 text-xs font-medium transition-all duration-150 relative"
+                style={{
+                  color:        active ? "var(--clr-text)" : "var(--clr-text-2)",
+                  background:   active ? "var(--clr-elevated)" : "transparent",
+                  borderBottom: active ? `2px solid var(--clr-red)` : "2px solid transparent",
+                }}
+              >
+                {t.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Ticker */}
+        <div
+          className="overflow-hidden"
+          style={{
+            borderTop:  "1px solid var(--clr-red-border)",
+            background: "rgba(200,16,46,0.05)",
+          }}
+        >
+          <div className="flex items-stretch">
+            <div
+              className="flex-shrink-0 flex items-center px-3 py-1.5 font-display text-[11px] border-r"
+              style={{
+                color:        "var(--clr-red)",
+                borderColor:  "var(--clr-red-border)",
+                letterSpacing: "0.09em",
+              }}
             >
-              <option value="">Todas las regiones</option>
-              {MOCK_REGIONES.map((r) => (
-                <option key={r.code} value={r.code}>
-                  {r.name} ({r.count})
-                </option>
-              ))}
-            </select>
+              ESCRUTINIO
+            </div>
+            <div className="overflow-hidden flex-1 py-1.5 px-2">
+              <div
+                className="ticker-track flex whitespace-nowrap text-[11px] gap-14"
+                style={{ color: "var(--clr-text-2)" }}
+              >
+                <span>{TICKER_STR}</span>
+                <span aria-hidden>{TICKER_STR}</span>
+              </div>
+            </div>
           </div>
         </div>
       </header>
 
-      <main className="relative z-10 max-w-7xl mx-auto px-6 py-6 space-y-5">
-        {/* ── AVANCE BANNER ── */}
-        <AvanceBanner
-          actas={MOCK_STATS.actas}
-          totalEsperadas={MOCK_STATS.totalEsperadas}
-          avanceConteo={MOCK_STATS.avanceConteo}
-        />
+      {/* ── BREADCRUMB ── */}
+      <div
+        className="max-w-7xl mx-auto px-6 pt-4 pb-0"
+        style={{ color: "var(--clr-text-3)" }}
+      >
+        <p className="text-[10px] uppercase tracking-[0.18em]">
+          {TABS.find((t) => t.id === tab)?.eyebrow}
+        </p>
+      </div>
 
-        {/* ── STAT CARDS ── */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard
-            icon={DocumentTextIcon}
-            label="Actas procesadas"
-            value={fmt(MOCK_STATS.actas)}
-            sub="Actas contabilizadas"
-            color="blue"
-          />
-          <StatCard
-            icon={ChartBarIcon}
-            label="Participación"
-            value={`${MOCK_STATS.participacion}%`}
-            sub="Del padrón electoral"
-            color="purple"
-          />
-          <StatCard
-            icon={MapPinIcon}
-            label="Mesas computadas"
-            value={fmt(MOCK_STATS.mesas)}
-            sub="Mesas de votación"
-            color="indigo"
-          />
-          <StatCard
-            icon={UsersIcon}
-            label="Total electores"
-            value={fmt(MOCK_STATS.electores)}
-            sub="Padrón habilitado 2026"
-            color="cyan"
-          />
-        </div>
-
-        {/* ── PODIO TOP 3 ── */}
-        <PodioSection data={MOCK_VOTOS_NACIONAL} />
-
-        {/* ── RANKING + DESGLOSE ── */}
-        <div className="grid grid-cols-1 xl:grid-cols-5 gap-4">
-          <div className="xl:col-span-3">
-            <RankingPartidos data={MOCK_VOTOS_NACIONAL} />
-          </div>
-          <div className="xl:col-span-2">
-            <DesglosVotos data={MOCK_DESGLOSE_DATA} />
-          </div>
-        </div>
-
-        {/* ── ESTADO ACTAS + ACTAS POR REGIÓN ── */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-          <EstadoActas data={MOCK_CANDIDATOS} />
-          <ActasPorRegion data={MOCK_ACTAS_REGION} />
-        </div>
-
-        {/* ── MAPA + TABLA ── */}
-        <div className="grid grid-cols-1 xl:grid-cols-5 gap-4">
-          <div className="xl:col-span-2">
-            <PeruMap
-              regionData={MOCK_REGION_MAP_DATA}
-              ganadorData={MOCK_GANADOR_REGION}
-              viewMode={mapView}
-              onToggleView={() =>
-                setMapView((v) => (v === "participacion" ? "ganador" : "participacion"))
-              }
-            />
-          </div>
-          <div className="xl:col-span-3">
-            <MesasTable mesas={mesas} search={search} onSearchChange={setSearch} />
-          </div>
-        </div>
+      {/* ── CONTENT ── */}
+      <main className="relative z-10 max-w-7xl mx-auto px-6 py-4">
+        {tab === "nacional"  && <NacionalView />}
+        {tab === "regiones"  && <RegionesView />}
+        {tab === "mesas"     && <MesasView />}
       </main>
 
-      <footer className="relative z-10 text-center py-6">
-        <p className="text-white/15 text-xs">
-          Fuente: Oficina Nacional de Procesos Electorales (ONPE) · Datos de muestra
-        </p>
+      {/* ── FOOTER ── */}
+      <footer className="relative z-10 text-center py-8">
+        <div className="flex items-center justify-center gap-3">
+          <div className="h-px w-16" style={{ background: "var(--clr-border)" }} />
+          <p
+            className="text-[9px] uppercase tracking-[0.22em]"
+            style={{ color: "var(--clr-text-3)" }}
+          >
+            Fuente: ONPE · Datos de muestra · Elecciones Generales 2026
+          </p>
+          <div className="h-px w-16" style={{ background: "var(--clr-border)" }} />
+        </div>
       </footer>
     </div>
   );
