@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+.claude/*.json
+
+# Python
+__pycache__/
+backend/__pycache__/
+*.pyc
